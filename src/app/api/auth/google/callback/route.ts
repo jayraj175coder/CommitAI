@@ -1,5 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function getBaseUrl(req?: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
+  }
+  if (req) {
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") || "https";
+    if (host) return `${proto}://${host}`.replace(/\/$/, "");
+  }
+  return "http://localhost:3000";
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
@@ -7,7 +22,7 @@ export async function GET(req: NextRequest) {
   const state = searchParams.get("state");
   const storedState = req.cookies.get("google_oauth_state")?.value;
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl(req);
 
   if (error || !code) {
     const notice = error === "access_denied" ? "cancelled" : "auth_failed";

@@ -48,11 +48,43 @@ export function MainApp() {
   const [activeMetricFilter, setActiveMetricFilter] = useState<string>("all");
   const [apiKey, setApiKey] = useState<string>("");
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+  const [authBanner, setAuthBanner] = useState<{ type: "success" | "error" | "info"; message: string } | null>(null);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCommitments(CommitmentStorage.getCommitments());
     setIsMounted(true);
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const authSuccess = params.get("auth_success");
+      const authNotice = params.get("auth_notice");
+      const provider = params.get("provider") || "Google";
+
+      if (authSuccess) {
+        setAuthBanner({
+          type: "success",
+          message: `Successfully connected ${provider.charAt(0).toUpperCase() + provider.slice(1)}! You can now sync your commitments.`,
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (authNotice) {
+        let msg = `Authentication notice: ${authNotice}`;
+        if (authNotice === "setup_required") {
+          msg = `OAuth credentials missing in environment variables. Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.`;
+        } else if (authNotice === "cancelled") {
+          msg = `Sign-in cancelled.`;
+        } else if (authNotice === "token_exchange_failed" || authNotice === "auth_failed") {
+          msg = `Failed to authenticate ${provider}. Please verify your authorized OAuth redirect URI in Google Cloud Console.`;
+        } else if (authNotice === "csrf_state_mismatch") {
+          msg = `Security check state expired. Please try connecting again.`;
+        }
+        setAuthBanner({
+          type: authNotice === "cancelled" ? "info" : "error",
+          message: msg,
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
   }, []);
 
   const handleCommitmentsExtracted = (newItems: Commitment[]) => {
@@ -261,6 +293,36 @@ export function MainApp() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-8">
+        {/* OAuth Feedback Notice Banner */}
+        {authBanner && (
+          <div
+            className={`p-4 rounded-2xl border flex items-center justify-between text-xs transition-all shadow-lg ${
+              authBanner.type === "success"
+                ? "bg-emerald-950/50 border-emerald-500/40 text-emerald-300"
+                : authBanner.type === "error"
+                ? "bg-rose-950/50 border-rose-500/40 text-rose-300"
+                : "bg-zinc-900 border-zinc-700 text-zinc-300"
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {authBanner.type === "success" ? (
+                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              ) : authBanner.type === "error" ? (
+                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+              ) : (
+                <Activity className="w-4 h-4 text-zinc-400 shrink-0" />
+              )}
+              <span className="font-medium">{authBanner.message}</span>
+            </div>
+            <button
+              onClick={() => setAuthBanner(null)}
+              className="text-zinc-400 hover:text-zinc-100 font-bold px-2 py-1 rounded hover:bg-zinc-800 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* INTERACTIVE 60-SECOND MAGIC DEMO MODAL OVERLAY */}
         {demoStep !== null && (
           <div className="bg-gradient-to-r from-indigo-950/90 via-zinc-950 to-zinc-950 border border-indigo-500/40 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in duration-200 relative overflow-hidden">

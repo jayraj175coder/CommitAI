@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
+function getBaseUrl(req?: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
+  }
+  if (req) {
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") || "https";
+    if (host) return `${proto}://${host}`.replace(/\/$/, "");
+  }
+  return "http://localhost:3000";
+}
+
 export async function GET(req: NextRequest) {
+  const baseUrl = getBaseUrl(req);
   const clientId = process.env.DISCORD_CLIENT_ID;
-  const redirectUri = process.env.DISCORD_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/auth/discord/callback`;
+  const redirectUri = process.env.DISCORD_REDIRECT_URI || `${baseUrl}/api/auth/discord/callback`;
 
   if (!clientId) {
-    return NextResponse.redirect(new URL("/connections?auth_notice=discord_setup_required", req.url));
+    return NextResponse.redirect(`${baseUrl}/connections?auth_notice=discord_setup_required`);
   }
 
   const state = crypto.randomBytes(16).toString("hex");

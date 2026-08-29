@@ -44,6 +44,30 @@ function extractTextFromPayload(payload: GmailMessagePayload): string {
   return text;
 }
 
+async function refreshGoogleToken(refreshToken: string): Promise<string | null> {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret || !refreshToken) return null;
+
+  try {
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.access_token || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const cookie = req.cookies.get("google_session");
 
@@ -56,10 +80,22 @@ export async function POST(req: NextRequest) {
 
   try {
     const session = JSON.parse(Buffer.from(cookie.value, "base64").toString("utf-8"));
-    const accessToken = session.accessToken;
+    let accessToken = session.accessToken;
+    let refreshed = false;
 
-    if (!accessToken) {
+    if (!accessToken && !session.refreshToken) {
       return NextResponse.json({ error: "Access token missing." }, { status: 401 });
+    }
+
+    if (!accessToken && session.refreshToken) {
+      const newAccessToken = await refreshGoogleToken(session.refreshToken);
+      if (newAccessToken) {
+        accessToken = newAccessToken;
+        session.accessToken = newAccessToken;
+        refreshed = true;
+      } else {
+        return NextResponse.json({ error: "Unable to refresh Google access token." }, { status: 401 });
+      }
     }
 
     let messagesFetchedCount = 0;
@@ -70,12 +106,28 @@ export async function POST(req: NextRequest) {
     const calendarConnector = new GoogleCalendarConnector();
 
     // 1. Fetch Gmail Messages (Fetch up to 50 recent messages from inbox / sent)
-    const listRes = await fetch(
+    let listRes = await fetch(
       `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
+
+    // If expired, refresh and retry once
+    if (listRes.status === 401 && session.refreshToken) {
+      const newAccessToken = await refreshGoogleToken(session.refreshToken);
+      if (newAccessToken) {
+        accessToken = newAccessToken;
+        session.accessToken = newAccessToken;
+        refreshed = true;
+        listRes = await fetch(
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+      }
+    }
 
     if (listRes.ok) {
       const listData = await listRes.json();
@@ -189,9 +241,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log(`[Gmail Sync] [Audit Log] User: ${session.email || "Authenticated User"} | Fetched ${messagesFetchedCount} messages, analyzed ${messagesAnalyzedCount}, extracted ${commitmentsDiscovered.length} commitments.`);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       syncedAt: new Date().toISOString(),
       messagesFetched: messagesFetchedCount,
       messagesAnalyzed: messagesAnalyzedCount,
@@ -203,6 +253,18 @@ export async function POST(req: NextRequest) {
         commitmentsDiscoveredCount: commitmentsDiscovered.length,
       },
     });
+
+    if (refreshed) {
+      response.cookies.set("google_session", Buffer.from(JSON.stringify(session)).toString("base64"), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+      });
+    }
+
+    return response;
   } catch (err: unknown) {
     console.error("Sync error:", err);
     return NextResponse.json({ error: "Internal server error during Google sync." }, { status: 500 });
