@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Commitment } from "@/types/commitment";
 import { Search, Check, Trash2, ShieldAlert, AlertTriangle, ExternalLink, ChevronDown, ChevronUp, HelpCircle, Calendar, Clock, Bell, Sparkles, FileText, CheckCircle2 } from "lucide-react";
 import { StatusBadge, DirectionBadge, SourceBadge, ConfidenceIndicator } from "./StatusBadge";
 import { formatDueDateDisplay } from "@/lib/dateNormalizer";

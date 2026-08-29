@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Commitment } from "@/types/commitment";
+import { executeNaturalLanguageQuery, NLQueryResult, generateFollowUpMessage } from "@/lib/nlQueryEngine";
 import { Search, Sparkles, ExternalLink, ShieldCheck, FileText, User, Bot, ArrowRight, Copy, Check } from "lucide-react";
 import { StatusBadge, SourceBadge, ConfidenceIndicator } from "./StatusBadge";
 import { calculateRiskScore } from "@/lib/scoringEngine";

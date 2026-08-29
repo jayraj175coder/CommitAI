@@ -195,8 +195,7 @@ export function calculateCommitmentHealth(commitments: Commitment[]): {
 }
 
 export function calculateRiskScore(
-  commitment: Commitment,
-  _referenceDate: Date = new Date()
+  commitment: Commitment
 ): {
   riskScore: number;
   riskCategory: "Critical" | "High" | "Medium" | "Low";

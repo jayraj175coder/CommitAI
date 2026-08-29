@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/auth/google/callback`;

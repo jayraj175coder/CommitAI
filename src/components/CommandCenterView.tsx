@@ -38,11 +38,10 @@ export function CommandCenterView({
   commitments,
   onSelectEvidence,
   onStatusChange,
-  _onUpdateCommitment,
   onFilterMetric,
   onNavigateToTab,
   onSyncNow,
-}: CommandCenterViewProps & { _onUpdateCommitment?: unknown }) {
+}: CommandCenterViewProps) {
   const [showHealthWhy, setShowHealthWhy] = useState(false);
   const [whySeeingId, setWhySeeingId] = useState<string | null>(null);
 
