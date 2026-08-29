@@ -2,31 +2,38 @@
 
 ### AI that remembers what you promised.
 
-> **Your conversations are full of commitments. CommitAI makes sure they don't get lost.**
+> **CommitAI turns conversations into evidence-backed commitments, identifies what is at risk, and helps you take action before promises fall through the cracks.**
 
-[Live Demo](YOUR_DEPLOYED_URL) · [Demo Video](YOUR_VIDEO_URL)
+[![BuildSprint 2026](https://img.shields.io/badge/BuildSprint-2026-blue)](#) [![Built with LatentCode](https://img.shields.io/badge/Built%20with-LatentCode-purple)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#license)
+
+**[Live Demo](YOUR_DEPLOYED_URL)** · **[Demo Video](YOUR_VIDEO_URL)** · **[GitHub](https://github.com/jayraj175coder/CommitAI)**
 
 ---
 
-## 🚨 The Problem
+## The Problem
 
-Every day, people make commitments inside conversations:
+Important commitments rarely arrive as neatly created tasks.
 
-> "I'll send the proposal tomorrow."
+They appear naturally inside the communication we already use:
 
-> "I'll review the document by Friday."
+> "I'll send the revised proposal by Friday."
 
-> "I'll get back to you this afternoon."
+> "I'll review the document tomorrow."
 
-These aren't created as tasks.
+> "I'll get back to you next week."
 
-They're buried inside emails, meetings, calendars and chats.
+The problem is that these promises are usually buried inside emails, meetings, calendars, and conversations.
 
-And when communication gets busy:
+As communication grows, people lose track of:
 
-**Promises get forgotten. Deadlines slip. Follow-ups are missed.**
+- What they promised
+- What someone promised them
+- Who owes what
+- When something is due
+- Which commitments are becoming risky
+- Where the original promise came from
 
-Traditional task managers have one fundamental limitation:
+Traditional task managers solve a different problem:
 
 > **They track what you remember to enter.**
 
@@ -34,25 +41,29 @@ Traditional task managers have one fundamental limitation:
 
 ---
 
-# 💡 What is CommitAI?
+# What is CommitAI?
 
 **CommitAI is an AI-powered commitment intelligence platform.**
 
-It transforms communication into a structured, evidence-backed map of:
-
-**Who promised what, to whom, by when, and what needs attention.**
+It turns everyday communication into a structured, evidence-backed commitment layer:
 
 ```text
 Communication
-      ↓
+      │
+      ▼
 Commitment Detection
-      ↓
+      │
+      ▼
 Who + What + When
-      ↓
+      │
+      ▼
 Evidence Verification
-      ↓
+      │
+      ▼
 Risk Detection
-      ↓
-Action / Follow-up
-      ↓
+      │
+      ▼
+Recommended Action
+      │
+      ▼
 Completed Commitment
