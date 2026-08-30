@@ -8,7 +8,7 @@
 [![Built with LatentCode](https://img.shields.io/badge/Built%20with-LatentCode-purple)](#)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 
-**[Live Demo](YOUR_DEPLOYED_URL)** · **[Demo Video](YOUR_VIDEO_URL)** · **[GitHub](https://github.com/jayraj175coder/CommitAI)**
+**[Live Demo]((https://commitai-smoky.vercel.app/))** · **[Demo Video]((https://drive.google.com/file/d/13tRIV7tVUJ91y_N4V3VS6Ck_DKk5DAkq/view?usp=sharing))** · **[GitHub](https://github.com/jayraj175coder/CommitAI)**
 
 ---
 
